@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  products  Product[]
+  invoices  Invoice[]
+
+  @@map("users")
+}
+
+model Product {
+  id             String        @id @default(uuid())
+  userId         String        @map("user_id")
+  user           User          @relation(fields: [userId], references: [id])
+  sku            String
+  name           String
+  description    String?
+  unitPrice      Int           @map("unit_price") // stored as integer minor units (rupiah)
+  quantityOnHand Int           @map("quantity_on_hand")
+  deletedAt      DateTime?     @map("deleted_at") // null = active; set = soft-deleted
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  invoiceItems   InvoiceItem[]
+
+  @@unique([userId, sku]) // SKU unique per user, not globally
+  @@map("products")
+}
+
+
+
+model Invoice {
+  id            String        @id @default(uuid())
+  userId        String        @map("user_id")
+  user          User          @relation(fields: [userId], references: [id])
+  invoiceNumber String        @unique @map("invoice_number")
+  customerName  String        @map("customer_name")
+  issueDate     DateTime      @map("issue_date")
+  dueDate       DateTime?     @map("due_date")
+  status        String        @default("DRAFT")
+  notes         String?
+  subtotal      Int           // integer minor units
+  taxAmount     Int           @map("tax_amount") // integer minor units
+  total         Int           // integer minor units
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  items         InvoiceItem[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String   @map("invoice_id")
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId   String?  @map("product_id") // nullable: product may be soft-deleted later
+  product     Product? @relation(fields: [productId], references: [id])
+  productName String   @map("product_name") // snapshot at invoice creation
+  unitPrice   Int      @map("unit_price")   // snapshot at invoice creation
+  quantity    Int
+  lineTotal   Int      @map("line_total")   // computed: unitPrice * quantity
+
+  @@map("invoice_items")
+}
