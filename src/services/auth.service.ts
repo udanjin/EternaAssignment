@@ -6,7 +6,6 @@ import {
 import { PrismaService } from '../database/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-// We will import DTOs from API layer since they represent the HTTP payload
 import { RegisterDto, LoginDto } from '../api/auth/dto/auth.dto';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async register(dto: RegisterDto) {
     const existingUser = await this.prisma.user.findUnique({

@@ -27,7 +27,7 @@ export class InvoicesService {
   }
 
   async create(userId: string, dto: CreateInvoiceDto) {
-    // 1. Fetch current product prices (Snapshot)
+    // 1. Fetch current product prices
     const productIds = dto.items.map((i) => i.productId);
     const products = await this.prisma.product.findMany({
       where: { id: { in: productIds }, userId, deletedAt: null },
@@ -50,11 +50,11 @@ export class InvoicesService {
       };
     });
 
-    // 3. Calculate safe integer totals
+    // 3. Calculate totals
     const { processedItems, subtotal, taxAmount, total } =
       this.pricingService.calculateTotals(itemsForPricing);
 
-    // 4. Generate invoice number (ideally inside transaction, but safe enough here for test scope)
+    // 4. Generate invoice number
     const invoiceNumber = await this.generateInvoiceNumber(userId);
 
     // 5. Save Invoice + Items
@@ -135,7 +135,7 @@ export class InvoicesService {
         throw new ConflictException(`Cannot issue invoice in ${invoice.status} status`);
       }
 
-      // 2. Deduct stock (Throws UnprocessableEntity if insufficient)
+      // 2. Deduct stock
       await this.stockService.deductStock(tx, invoice.items);
 
       // 3. Update status
@@ -172,7 +172,7 @@ export class InvoicesService {
         throw new ConflictException(`Cannot cancel invoice in ${invoice.status} status`);
       }
 
-      // Restore stock ONLY if it was previously ISSUED and deducted
+      // Restore stock ONLY if it was previously ISSUED
       if (invoice.status === InvoiceStatus.ISSUED) {
         await this.stockService.restoreStock(tx, invoice.items);
       }
