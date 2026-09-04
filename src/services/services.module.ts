@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ProductsService } from './products.service';
+import { PricingService } from './pricing.service';
+import { StockService } from './stock.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
@@ -14,7 +16,7 @@ import { ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  providers: [AuthService, ProductsService],
-  exports: [AuthService, ProductsService],
+  providers: [AuthService, ProductsService, PricingService, StockService],
+  exports: [AuthService, ProductsService, PricingService, StockService],
 })
-export class ServicesModule { }
+export class ServicesModule {}
