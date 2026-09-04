@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -37,7 +37,12 @@ model Product {
   @@map("products")
 }
 
-
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  CANCELLED
+}
 
 model Invoice {
   id            String        @id @default(uuid())
@@ -47,7 +52,7 @@ model Invoice {
   customerName  String        @map("customer_name")
   issueDate     DateTime      @map("issue_date")
   dueDate       DateTime?     @map("due_date")
-  status        String        @default("DRAFT")
+  status        InvoiceStatus @default(DRAFT)
   notes         String?
   subtotal      Int           // integer minor units
   taxAmount     Int           @map("tax_amount") // integer minor units
