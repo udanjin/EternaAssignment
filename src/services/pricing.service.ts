@@ -14,7 +14,7 @@ export class PricingService {
    * Calculate invoice totals purely using integer math (minor units)
    * to avoid floating point precision issues.
    */
-  calculateTotals(items: { unitPrice: number; quantity: number }[]) {
+  calculateTotals<T extends { unitPrice: number; quantity: number }>(items: T[]) {
     // lineTotal is unitPrice * quantity
     const processedItems = items.map(item => ({
       ...item,
