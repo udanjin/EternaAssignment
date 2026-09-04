@@ -26,12 +26,8 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // We set the JWT guard globally, but we don't apply it here yet because AuthModule isn't ready.
-  // When AuthModule is ready, the guard will throw if it can't find JwtService/ConfigService properly.
-  // We will uncomment this once AuthModule is built in Task 4!
-  
-  // const reflector = app.get(Reflector);
-  // app.useGlobalGuards(new JwtAuthGuard(reflector));
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   const config = new DocumentBuilder()
     .setTitle('StockFlow API')
